@@ -1,49 +1,89 @@
-# Converting EBS Volume gp2 to gp3
+# Event-Driven Architecture for maintaing companies policy for only using EBS volume 'gp3' using LambdaFunction and CloudWatch and IAM !
 Created a lambda script using boto3 to convert EBS volume gp2 to gp3 automatically.
 
 # Project Application
 Suppose you work in a company which only works with the gp3 ebs but by mistake someone created the EBS with gp2 in that scenario it will convert the gp2 to gp3 automatically
 
-# Project Setup
+# AWS Lambda Setup
   - Login to the AWS Account
   - Create a lambda function named `ebs-volume-check`
+  ![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/8ccf2050-a8ea-4146-9940-94125accfe5c)
+
   - Run the test
-  - Now navigate to the `CloudWatch`
-        - Rules
-        - Event Source : Event Pattern
-        - Service Name : EC2
-        - Event Type : EBS Volument Notification
-        - Specific Event : create volume
-        - Target : Lambda Function
-        - Function : ebs-volume-check
-        - Name : ebs-vol-check
+ # CloudWatch Setup
+  - Rules
+     1. Event Source : Event Pattern
+     2. Service Name : EC2
+     3. Event Type : EBS Volument Notification
+     4. Specific Event : create volume
+     5. Target : Lambda Function
+     6. Function : ebs-volume-check
+     7. Name : ebs-vol-check
 
-You will need django to be installed in you computer to run this app. Head over to https://www.djangoproject.com/download/ for the download guide
+  # Event Pattern 
+  ```
+   {
+    "source": ["aws.ec2"],
+    "detail-type": ["EBS Volume Notification"],
+    "detail": {
+      "event": ["createVolume"]
+    }
+  }
+  ```
 
-Once you have downloaded django, go to the cloned repo directory and run the following command
+![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/d25eea91-0036-46a8-824b-fc401dd9b072)
 
-```bash
-$ python manage.py makemigrations
+# IAM Setup
+Roles -> Permission Policies -> ebs-vol-check
+
+![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/233ffdc8-9bcc-43f5-b749-209751cd49d3)
+Click on `Add permission` -> `Create inline policity` 
+  - Service : EC2
+  - Actions : Volume
+        - Create Volume 
+        - Modify Volume
+        - Modify Volume Attribute
+        - Describe Volumes
+        - Describe Volumes Attribute
+
+    - Resources : All resources
+
 ```
-
-This will create all the migrations file (database migrations) required to run this App.
-
-Now, to apply this migrations run the following command
-```bash
-$ python manage.py migrate
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:ModifyVolume",
+                "ec2:ModifyVolumeAttribute",
+                "ec2:CreateVolume"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
 ```
+![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/0d0c0579-d35c-4958-9045-9a2a236eafd4)
 
-One last step and then our EMS App will be live. We need to create an admin user to run this App. On the terminal, type the following command and provide username, password and email for the admin user
-```bash
-$ python manage.py createsuperuser
-```
 
-That was pretty simple, right? Now let's make the App live. We just need to start the server now and then we can start using our simple EMS App. Start the server by following command
+# Create a gp2 volume and test the function
+  - Created volume with gp2
+  ![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/6c5ad225-dc00-4f04-9411-b3cb3cb22fe2)  
+  - Automatically changed to gp3
+  ![image](https://github.com/amitgitz/project-ebs-boto3/assets/88843810/2876d664-1f14-4a09-b1b2-24aa074604ec)
 
-```bash
-$ python manage.py runserver
-```
+  
+  Congratulations! Your ebs has been changed to gp3
+ - If you have any questions or encounter any problems with this project, feel free to connect with me on https://www.linkedin.com/in/devopsamit/
 
-Once the server is hosted, head over to http://127.0.0.1:8000/ for the App.
+  
 
-Cheers and Happy Coding :)
+
+
+
+
+
+
+
